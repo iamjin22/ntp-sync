@@ -1,0 +1,37 @@
+{
+  "name": "ntp-sync",
+  "version": "1.0.0",
+  "description": "Zero-dependency, type-safe NTP/SNTP client for Node.js with robust fallback and offset calculation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "test": "vitest"
+  },
+  "keywords": [
+    "ntp",
+    "sntp",
+    "time",
+    "synchronization",
+    "clock",
+    "offset",
+    "node",
+    "typescript"
+  ],
+  "repository": "github.com/iamjin22/ntp-sync",
+  "homepage": "https://github.com/iamjin22/ntp-sync#readme",
+  "author": "iamjin",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0",
+    "vitest": "^1.0.0"
+  }
+}
