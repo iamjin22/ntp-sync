@@ -1,13 +1,13 @@
 import dgram from 'node:dgram';
 import { NtpSyncError } from './ntp-errors';
+import { NTP_DEFAULT_SERVERS, NTP_PORT, NtpPacket, NtpResponse } from './ntp-packet';
 import {
     deserializeNtpPacket,
     getAutoNtpPrecision,
     getCurrentNtpTimestamp,
     ntpTimestampToDate,
-    serializeNtpPacket,
+    serializeNtpPacket
 } from './ntp-utils';
-import { NTP_DEFAULT_SERVERS, NTP_PORT, NtpPacket, NtpResponse } from './ntp-packet';
 
 export interface NtpQueryOptions {
     port?: number;
@@ -30,47 +30,22 @@ export class NtpSync {
     ): Promise<NtpResponse> {
         return new Promise((resolve, reject) => {
             const socket = dgram.createSocket('udp4');
-
-            let packet: NtpPacket;
-
-            if (customPacket) {
-                packet = {
-                    leapIndicator: 0,
-                    version: 4,
-                    mode: 3,                    // client
-                    stratum: 0,
-                    poll: 4,
-                    precision: getAutoNtpPrecision(),
-                    rootDelay: 0,
-                    rootDispersion: 0,
-                    referenceId: 0,
-                    referenceTimestamp: 0,
-                    originTimestamp: getCurrentNtpTimestamp(),
-                    receiveTimestamp: 0,
-                    transmitTimestamp: 0,
-                    ...customPacket,
-                };
-
-                if (customPacket.originTimestamp === undefined) {
-                    packet.originTimestamp = getCurrentNtpTimestamp();
-                }
-            } else {
-                packet = {
-                    leapIndicator: 0,
-                    version: 4,
-                    mode: 3,
-                    stratum: 0,
-                    poll: 0,
-                    precision: getAutoNtpPrecision(),
-                    rootDelay: 0,
-                    rootDispersion: 0,
-                    referenceId: 0,
-                    referenceTimestamp: 0,
-                    originTimestamp: getCurrentNtpTimestamp(),
-                    receiveTimestamp: 0,
-                    transmitTimestamp: 0,
-                };
-            }
+            const packet: NtpPacket = {
+                leapIndicator: 0,
+                version: 1,
+                mode: 3,
+                stratum: 0,
+                poll: 0,
+                precision: getAutoNtpPrecision(),
+                rootDelay: 0,
+                rootDispersion: 0,
+                referenceId: 0,
+                referenceTimestamp: 0,
+                originTimestamp: 0,
+                receiveTimestamp: 0,
+                transmitTimestamp: getCurrentNtpTimestamp(),
+                ...customPacket
+            };
 
             const request = serializeNtpPacket(packet);
             const t1 = Date.now();

@@ -137,17 +137,17 @@ function clampPrecisionByOS(precision: number): number {
     }
 
     if (platform === 'linux') {
-        // Linux: -10 ~ -18
-        return clamp(precision, -18, -10);
+        // Linux: -11 ~ -18
+        return clamp(precision, -18, -11);
     }
 
     if (platform === 'darwin') {
-        // macOS: -18 ~ -23
-        return clamp(precision, -23, -18);
+        // macOS: -19 ~ -23
+        return clamp(precision, -23, -19);
     }
 
     // Fallback safe range
-    return clamp(precision, -24, -23);
+    return clamp(precision, -25, -24);
 }
 
 function clamp(value: number, min: number, max: number): number {
