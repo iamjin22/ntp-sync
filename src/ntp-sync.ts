@@ -61,7 +61,7 @@ export class NtpSync {
                     mode: 3,
                     stratum: 0,
                     poll: 0,
-                    precision: 0,
+                    precision: getAutoNtpPrecision(),
                     rootDelay: 0,
                     rootDispersion: 0,
                     referenceId: 0,
