@@ -1,6 +1,6 @@
 {
-  "name": "ntp-sync",
-  "version": "1.0.0",
+  "name": "@iamjin22/ntp-sync",
+  "version": "0.0.1",
   "description": "Zero-dependency, type-safe NTP/SNTP client for Node.js with robust fallback and offset calculation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
