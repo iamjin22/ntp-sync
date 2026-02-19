@@ -2,6 +2,7 @@
  * Constants used across NTP packet handling
  */
 export const NTP_PORT = 123;
+export const NTP_DEFAULT_SERVERS = ['pool.ntp.org', 'time.google.com', 'time.cloudflare.com'];
 export const NTP_EPOCH_OFFSET = 2208988800; // seconds from 1900 to 1970
 export const NTP_TIMESTAMP_SCALE = 4294967296; // 2^32
 

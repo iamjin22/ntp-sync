@@ -1,5 +1,5 @@
+import os from 'os';
 import { NTP_EPOCH_OFFSET, NTP_TIMESTAMP_SCALE, NtpPacket } from './ntp-packet';
-
 /**
  * Get current system time as NTP timestamp (seconds since 1900-01-01)
  */
@@ -92,4 +92,73 @@ export function deserializeNtpPacket(buffer: Buffer): NtpPacket {
         receiveTimestamp: readNtpTimestamp(buffer, 32),
         transmitTimestamp: readNtpTimestamp(buffer, 40),
     };
+}
+
+/**
+ * Estimate system timer resolution using process.hrtime.bigint()
+ * Returns estimated resolution in nanoseconds.
+ */
+export function estimateSystemResolution(iterations = 100000): number {
+    let minDiff = BigInt(Number.MAX_SAFE_INTEGER);
+    let prev = process.hrtime.bigint();
+
+    for (let i = 0; i < iterations; i++) {
+        const now = process.hrtime.bigint();
+        const diff = now - prev;
+
+        if (diff > 0n && diff < minDiff) {
+            minDiff = diff;
+        }
+
+        prev = now;
+    }
+
+    return Number(minDiff); // nanoseconds
+}
+
+/**
+ * Convert system resolution (ns) to NTP precision value.
+ * precision = floor(log2(resolution_seconds))
+ */
+export function calculateNtpPrecision(resolutionNs: number): number {
+    const resolutionSeconds = resolutionNs / 1e9;
+    return Math.floor(Math.log2(resolutionSeconds));
+}
+
+/**
+ * Clamp precision to requested OS ranges
+ */
+function clampPrecisionByOS(precision: number): number {
+    const platform = os.platform();
+
+    if (platform === 'win32') {
+        // Windows: -6 ~ -10
+        return clamp(precision, -10, -6);
+    }
+
+    if (platform === 'linux') {
+        // Linux: -10 ~ -18
+        return clamp(precision, -18, -10);
+    }
+
+    if (platform === 'darwin') {
+        // macOS: -18 ~ -23
+        return clamp(precision, -23, -18);
+    }
+
+    // Fallback safe range
+    return clamp(precision, -24, -23);
+}
+
+function clamp(value: number, min: number, max: number): number {
+    return Math.min(Math.max(value, min), max);
+}
+
+/**
+ * Automatically estimate and return NTP precision value.
+ */
+export function getAutoNtpPrecision(): number {
+    const resolutionNs = estimateSystemResolution();
+    const rawPrecision = calculateNtpPrecision(resolutionNs);
+    return clampPrecisionByOS(rawPrecision);
 }

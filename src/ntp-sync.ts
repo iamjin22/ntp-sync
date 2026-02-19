@@ -2,11 +2,12 @@ import dgram from 'node:dgram';
 import { NtpSyncError } from './ntp-errors';
 import {
     deserializeNtpPacket,
+    getAutoNtpPrecision,
     getCurrentNtpTimestamp,
     ntpTimestampToDate,
     serializeNtpPacket,
 } from './ntp-utils';
-import { NTP_PORT, NtpPacket, NtpResponse } from './ntp-packet';
+import { NTP_DEFAULT_SERVERS, NTP_PORT, NtpPacket, NtpResponse } from './ntp-packet';
 
 export interface NtpQueryOptions {
     port?: number;
@@ -39,7 +40,7 @@ export class NtpSync {
                     mode: 3,                    // client
                     stratum: 0,
                     poll: 4,
-                    precision: -20,
+                    precision: getAutoNtpPrecision(),
                     rootDelay: 0,
                     rootDispersion: 0,
                     referenceId: 0,
@@ -141,10 +142,12 @@ export class NtpSync {
      * Get accurate network time, automatically falling back between servers
      */
     public static async getNetworkTime(
-        servers: string[] = ['pool.ntp.org', 'time.google.com', 'time.cloudflare.com'],
+        servers: string[] = [],
         customPacket?: Partial<NtpPacket> | NtpPacket,
         options: NtpQueryOptions = {}
     ): Promise<NtpResponse> {
+        const allServers = [...servers, ...NTP_DEFAULT_SERVERS]
+
         const opts: Required<NtpQueryOptions> = {
             port: options.port ?? NTP_PORT,
             timeoutMs: options.timeoutMs ?? 5000,
@@ -153,7 +156,7 @@ export class NtpSync {
 
         const errors: string[] = [];
 
-        for (const server of servers) {
+        for (const server of allServers) {
             try {
                 return await NtpSync.queryServer(server, customPacket, opts);
             } catch (err: unknown) {
@@ -163,6 +166,6 @@ export class NtpSync {
             }
         }
 
-        throw NtpSyncError.allServersFailed(servers);
+        throw NtpSyncError.allServersFailed(allServers);
     }
 }
